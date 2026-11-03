@@ -1,0 +1,25 @@
+const fs=require('node:fs');
+const vm=require('node:vm');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync(require('node:path').join(__dirname,'..','index.html'),'utf8');
+const code=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const context={module:{exports:{}},console};
+vm.runInNewContext(code,context);
+const {BOOK,RAW,makeVerbs,normalize,matchesAnswer,chooseRows,gradeRows,parseImport,displayGrade}=context.module.exports;
+let tests=0;
+function check(name,fn){fn();tests++;console.log('✓ '+name)}
+const v=id=>BOOK.find(x=>x.id===id);
+const row=(id,clue,answers)=>({id,clue,answers});
+check('Book contains 88 unique verbs in original order',()=>{assert.equal(BOOK.length,88);assert.equal(new Set(BOOK.map(x=>x.id)).size,88);assert.equal(BOOK[0].id,'be');assert.equal(BOOK.at(-1).id,'write')});
+check('Every verb has answers for every requested column',()=>{for(const x of BOOK)for(let c=0;c<4;c++){if(x.forms[c]!=null){assert.ok(x.accepted[c].length);assert.ok(matchesAnswer(x,c,x.forms[c]),`${x.id}: ${c}`)}}});
+check('Variants, spaces, case, accents and optional to are accepted',()=>{for(const [id,c,a] of [['be',1,' Was / WERE '],['be',1,'were'],['burn',1,'burned'],['burn',2,'burnt'],['dream',2,'dreamed'],['get',2,'gotten'],['hear',3,'oir'],['do',3,'hacer'],['make',3,'fabricar'],['write',0,'to write']])assert.ok(matchesAnswer(v(id),c,a),`${id}: ${a}`)});
+check('Incorrect alternatives, wrong tenses, substrings and blanks are rejected',()=>{for(const [id,c,a] of [['be',1,'was / is'],['burn',1,'burnt / burn'],['eat',1,'eaten'],['write',2,'writtenx'],['hear',3,'o'],['go',1,''],['go',1,'wént']])assert.equal(matchesAnswer(v(id),c,a),false)});
+check('One valid hint per row; mixed hints are evenly distributed',()=>{for(let i=0;i<50;i++){const rows=chooseRows(BOOK);assert.equal(rows.length,88);let counts=[0,0,0,0];for(const r of rows){assert.ok(v(r.id).forms[r.clue]!=null);counts[r.clue]++;assert.equal(r.answers.filter(Boolean).length,0)}assert.ok(Math.max(...counts)-Math.min(...counts)<=2)}});
+check('Can has no participle and falls back to infinitive when requested',()=>{assert.equal(v('can').forms[2],null);assert.equal(chooseRows([v('can')],'2')[0].clue,0);const g=gradeRows([row('can',0,['','could','','poder'])],BOOK);assert.equal(g.totalCells,2);assert.equal(g.grade,10)});
+check('Whole-verb scoring: 15/20 gives 7.5, counts no clue points',()=>{const rows=BOOK.slice(0,20).map((v,i)=>row(v.id,0,v.forms.map((f,c)=>c===0?'':i<15?f??'':'')));const g=gradeRows(rows,BOOK,'verbs');assert.equal(g.complete,15);assert.equal(g.totalVerbs,20);assert.equal(g.totalCells,59);assert.equal(g.grade,7.5);assert.equal(displayGrade(g.grade),"7'5")});
+check('Cell scoring: 43/60 gives 7.2; complete rows counted separately',()=>{let remaining=43;const rows=BOOK.filter(v=>v.id!=='can').slice(0,20).map(v=>row(v.id,0,v.forms.map((f,c)=>c===0?'':remaining-->0?f:'')));const g=gradeRows(rows,BOOK,'cells');assert.equal(g.totalCells,60);assert.equal(g.correctCells,43);assert.equal(g.complete,14);assert.equal(g.grade,7.2);assert.equal(displayGrade(g.grade),"7'2")});
+check('Empty and perfect scores; given fields do not affect score',()=>{let rows=chooseRows(BOOK);assert.equal(gradeRows(rows,BOOK).grade,0);rows=rows.map(r=>({...r,answers:v(r.id).forms.map((f,c)=>c===r.clue?'incorrect ignored clue':f??'')}));assert.equal(gradeRows(rows,BOOK).grade,10);assert.equal(gradeRows(rows,BOOK,'cells').grade,10);assert.equal(gradeRows([],BOOK).grade,0)});
+check('CSV, TSV, headers, BOM, quoted separators and escaped quotes import',()=>{let r=parseImport('\uFEFFInfinitive;Past simple;Past participle;Translation\r\nbe;was / were;been;ser / estar\r\ngo;went;gone;ir');assert.equal(r.length,2);assert.equal(parseImport('eat\tate\teaten\tcomer')[0][0],'eat');assert.equal(parseImport('"go","went","gone","ir, marcharse"')[0][3],'ir, marcharse');assert.equal(parseImport('go;went;gone;"ir; marcharse"')[0][3],'ir; marcharse');assert.equal(parseImport('go;went;gone;"ir ""lejos"""')[0][3],'ir "lejos"')});
+check('Import rejects malformed, duplicate, oversized and incomplete rows',()=>{for(const input of ['', 'be;was;been', 'go;went;gone;ir\ngo;went;gone;ir','go;;gone;ir','go;went;;ir','go;went;gone;"ir','go;went;gone;'+ 'a'.repeat(151)])assert.throws(()=>parseImport(input));assert.equal(parseImport('can;could;—;poder')[0][2],null)});
+check('Imported lists use their own accepted forms',()=>{const custom=makeVerbs(parseImport('speak;spoke;spoken;hablar / conversar'));assert.ok(matchesAnswer(custom[0],3,'conversar'));assert.equal(matchesAnswer(custom[0],3,'decir'),false)});
+console.log(`\n${tests} checks passed.`);
