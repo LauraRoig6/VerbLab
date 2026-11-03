@@ -48,43 +48,63 @@ Documentación oficial consultada el 3 de noviembre de 2026:
 - Importar otra lista y descargar la lista actual como CSV.
 - Imprimir la corrección desde el navegador.
 
-## Puntuación
+## Actualizar una web que ya está en GitHub
 
-**Por verbo completo (opción inicial):** una fila suma un punto si todas sus respuestas son correctas. La columna que sirve de pista no cuenta. 15/20 verbos completos dan **7'5** sobre 10.
+Sustituye el `index.html` actual de tu repositorio por el de este paquete y confirma el cambio con **Commit changes**. Los demás archivos de la web no necesitan cambios. Si el repositorio ya está conectado a Vercel, la integración publicará el cambio en la rama de producción configurada.
 
-**Por cada respuesta:** cada casilla a completar vale un punto. Por ejemplo, 43/60 respuestas correctas dan **7'2**. También se indica cuántos verbos completos se han acertado.
+## Puntuación y traducciones
 
-La nota se redondea a una cifra decimal. Los errores y los huecos no suman, pero no restan puntos. Si quedan casillas sin responder, se solicita confirmación antes de corregir.
+La corrección distingue tres estados: **correcto (verde), parcial (ámbar) e incorrecto (rojo)**.
 
-`Can` es modal y no tiene participio: aparece una raya y no se pide ni puntúa esa casilla. Si se elige siempre la pista de participio, en esa fila se muestra el infinitivo.
+- Se aceptan los separadores `/` y `-` con o sin espacios: `was/were`, `was / were`, `was-were` y `was - were` equivalen.
+- Las variantes inglesas son alternativas: basta `was` o `were`; también basta `burnt` o `burned`.
+- Los sinónimos españoles de un mismo significado son intercambiables. Para `begin`, `empezar`, `comenzar` e `iniciar` dan la puntuación completa individualmente.
+- Cuando se estudian dos significados distintos, se pide una traducción de cada uno. `be` incluye **ser / estar**; `bite` incluye **morder / picar**. Un significado correcto da **medio punto** en esa traducción; los dos dan el punto completo.
+- Dar dos sinónimos del mismo significado no completa el segundo significado: `golpear / pegar` no sustituye al significado de `vencer` en `beat`.
+- Si se mezclan traducciones registradas con otras no válidas, se otorga medio punto y se indica qué parte hay que revisar. Si todas son inválidas o no se responde, la casilla no suma.
 
-## Qué respuestas acepta
+**Por verbo (opción inicial):** una fila suma 1 punto si todas sus respuestas son correctas. Si las formas inglesas son correctas y la traducción es parcial, la fila suma 0,5 puntos. Si hay un fallo en una forma inglesa, la fila no suma en este modo. Ejemplo: dos verbos completos y uno parcial suman **2,5/3 = 8'3**.
 
-Se ignoran las mayúsculas y los espacios sobrantes. En español también se ignoran las tildes. Se aceptan las variantes de la lista (p. ej. `burnt` o `burned`) y sinónimos registrados para las traducciones. Es suficiente escribir una variante correcta. Si se escriben varias separadas por `/`, **todas** deben ser válidas.
+**Por cada respuesta:** cada casilla a completar vale 1 punto; una traducción parcial vale 0,5. Un verbo con tres huecos, dos formas correctas y traducción parcial suma **2,5/3 puntos** en este modo.
 
-La lista conserva `got` y `gone / been` tal como aparecen en el libro. La corrección también acepta `gotten` para `get` y otras variantes estándar incluidas en `EXTRA`.
+La nota se redondea a una cifra decimal. La pista no se puntúa. Los errores y los huecos no restan puntos. Las filas con traducción parcial se incluyen al filtrar o repetir errores e incompletos.
 
-Las pistas españolas distinguen algunos significados próximos: `do` muestra «hacer (una tarea)» y `make` muestra «hacer / fabricar (crear algo)». Las aclaraciones entre paréntesis no son obligatorias al responder. El significado de `lie` es tumbarse, no mentir.
+`Can` no tiene participio: la raya no se pide ni se puntúa. Si se fija la pista del participio, en esa fila se muestra el infinitivo.
 
-La corrección usa un conjunto de respuestas admitidas; no utiliza IA para interpretar traducciones libres. Si quieres admitir más sinónimos, sepáralos con `/` al importar la lista o añádelos a `EXTRA` dentro de `index.html`.
+## Sinónimos y edición de significados
+
+Los 88 verbos tienen grupos de sinónimos revisados en el objeto `MEANINGS` dentro de `index.html`. Cada grupo interior es un significado y sus alternativas. Por ejemplo:
+
+```js
+begin: [['empezar', 'comenzar', 'iniciar']],
+bite: [['morder', 'dar un mordisco'], ['picar', 'dar una picadura']]
+```
+
+Las mayúsculas y los espacios sobrantes no cambian la corrección. En español se ignoran también las tildes. El sistema utiliza sinónimos registrados; no consulta IA ni interpreta cualquier traducción libre. Puedes ampliar `MEANINGS` si necesitas otra traducción válida. En la lista de consulta se pueden ver los sinónimos aceptados y los significados que hay que completar.
+
+La lista mantiene las formas inglesas de las fotografías. `ENGLISH_EXTRA` añade variantes estándar como `gotten`, `shined` o `showed` como participio.
 
 ## Importar una lista propia
 
-En **Lista de verbos → Importar otra lista**, pega una tabla desde Excel o un CSV/TXT. El orden de columnas debe ser:
+En **Lista de verbos → Importar otra lista**, pega una tabla desde Excel o un CSV/TXT. El orden de columnas es:
 
 `infinitive;past simple;past participle;traducción`
 
-Por ejemplo:
+Ejemplo:
 
 ```text
-be;was / were;been;ser / estar
-go;went;gone;ir
-eat;ate;eaten;comer
+be;was / were;been;ser + estar
+begin;began;begun;empezar / comenzar
+bite;bit;bitten;morder + picar
 ```
 
-Se aceptan tabuladores, punto y coma o comas como separadores. Si una casilla contiene el mismo separador, debe ir entre comillas, como en un CSV estándar. La cabecera es opcional. Máximo 500 verbos, 150 caracteres por casilla y archivo de 300 KB. No se admiten infinitivos repetidos.
+Para las traducciones, `/` o `-` separan sinónimos; ` + ` separa significados distintos que se deben completar. Para verbos registrados y formas inglesas compatibles, la app reconoce qué significados contiene la lista y acepta sus sinónimos. También reconoce `ser / estar` como dos significados conocidos. No aplica los significados de `lie / lay / lain` a una lista que contenga `lie / lied / lied`.
 
-La lista importada se guarda **solo en ese navegador**. No cambia la lista que verán otras personas al abrir la web. Para cambiar la lista inicial de todo el alumnado, modifica `RAW` en `index.html` y confirma ese cambio en GitHub. El archivo `lista-del-libro.csv` contiene la lista inicial para facilitar su edición.
+Para un verbo desconocido, `probar / examinar + comprobar` define dos significados: en el primero sirven probar o examinar; en el segundo, comprobar.
+
+Se admiten tabuladores, punto y coma o comas como separadores de columnas. Si una casilla contiene el mismo separador, debe ir entre comillas. La cabecera es opcional. Máximo 500 verbos, 150 caracteres por casilla y archivo de 300 KB; sin infinitivos repetidos.
+
+La descarga CSV conserva los grupos de sinónimos y significados. La lista importada se guarda solo en ese navegador; no modifica la lista inicial de todo el alumnado. Para cambiar la lista inicial, modifica `RAW` y `MEANINGS` en `index.html` y confirma el cambio en GitHub.
 
 ## Guardado y alcance
 
@@ -107,4 +127,4 @@ Para ejecutar las pruebas con Node.js:
 node tests/core.test.cjs
 ```
 
-Validación realizada: 12 grupos de comprobaciones del cálculo de nota, variantes, huecos, caso especial de `can`, reparto de pistas, importación y validación de listas. Además se ha probado en navegador el intervalo y la exclusión, el guardado tras recargar, la corrección, el repaso de errores, la importación y la restauración de listas. Diseño revisado en ordenador y en un marco de 390 px para comprobar la adaptación móvil.
+Validación realizada: 24 grupos de comprobaciones del cálculo de nota, variantes, huecos, caso especial de `can`, reparto de pistas, importación y validación de listas. Además se ha probado en navegador el intervalo y la exclusión, el guardado tras recargar, la corrección, el repaso de errores, la importación y la restauración de listas. La actualización comprueba además barras y guiones, todos los sinónimos registrados, medios puntos en ambos modos, separación de significados, exportación e importación sin pérdida de grupos, repaso de incompletos y visualización móvil de la corrección. Diseño revisado en ordenador y en un marco de 390 px para comprobar la adaptación móvil.
