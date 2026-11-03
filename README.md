@@ -59,15 +59,15 @@ La corrección distingue tres estados: **correcto (verde), parcial (ámbar) e in
 - Se aceptan los separadores `/` y `-` con o sin espacios: `was/were`, `was / were`, `was-were` y `was - were` equivalen.
 - Las variantes inglesas son alternativas: basta `was` o `were`; también basta `burnt` o `burned`.
 - Los sinónimos españoles de un mismo significado son intercambiables. Para `begin`, `empezar`, `comenzar` e `iniciar` dan la puntuación completa individualmente.
-- Cuando se estudian dos significados distintos, se pide una traducción de cada uno. `be` incluye **ser / estar**; `bite` incluye **morder / picar**. Un significado correcto da **medio punto** en esa traducción; los dos dan el punto completo.
-- Dar dos sinónimos del mismo significado no completa el segundo significado: `golpear / pegar` no sustituye al significado de `vencer` en `beat`.
+- Cuando un verbo tiene varios significados, se mantienen todos en la lista para estudiarlos. `be` incluye **ser / estar**; `bite` incluye **morder / picar**. Una sola traducción válida da **el punto completo**, aunque falten otros significados. Debajo aparece una nota informativa con los demás, sin penalización.
+- Basta un sinónimo válido de cualquiera de los significados registrados. Por ejemplo, tanto `golpear` como `vencer` son respuestas completas para `beat`.
 - Si se mezclan traducciones registradas con otras no válidas, se otorga medio punto y se indica qué parte hay que revisar. Si todas son inválidas o no se responde, la casilla no suma.
 
-**Por verbo (opción inicial):** una fila suma 1 punto si todas sus respuestas son correctas. Si las formas inglesas son correctas y la traducción es parcial, la fila suma 0,5 puntos. Si hay un fallo en una forma inglesa, la fila no suma en este modo. Ejemplo: dos verbos completos y uno parcial suman **2,5/3 = 8'3**.
+**Por verbo (opción inicial):** una fila suma 1 punto si todas sus respuestas son correctas. Si las formas inglesas son correctas y hay una traducción válida, la fila suma el punto completo aunque queden otros significados sin escribir. Solo una mezcla de traducciones válidas e inválidas mantiene el medio punto y el aviso para revisar lo incorrecto. Si hay un fallo en una forma inglesa, la fila no suma en este modo. Ejemplo: `bite / bit / bitten / picar` cuenta como verbo completo, y muestra «También significa: morder» sin descontar puntos.
 
-**Por cada respuesta:** cada casilla a completar vale 1 punto; una traducción parcial vale 0,5. Un verbo con tres huecos, dos formas correctas y traducción parcial suma **2,5/3 puntos** en este modo.
+**Por cada respuesta:** cada casilla a completar vale 1 punto; una traducción parcial vale 0,5. Un verbo con dos formas inglesas correctas y una traducción válida suma **3/3 puntos**, aunque tenga otros significados.
 
-La nota se redondea a una cifra decimal. La pista no se puntúa. Los errores y los huecos no restan puntos. Las filas con traducción parcial se incluyen al filtrar o repetir errores e incompletos.
+La nota se redondea a una cifra decimal. La pista no se puntúa. Los significados que falten son solo informativos y no envían el verbo al repaso. Los errores y los huecos no restan puntos. Las filas con traducción parcial se incluyen al filtrar o repetir errores e incompletos.
 
 `Can` no tiene participio: la raya no se pide ni se puntúa. Si se fija la pista del participio, en esa fila se muestra el infinitivo.
 
@@ -80,7 +80,7 @@ begin: [['empezar', 'comenzar', 'iniciar']],
 bite: [['morder', 'dar un mordisco'], ['picar', 'dar una picadura']]
 ```
 
-Las mayúsculas y los espacios sobrantes no cambian la corrección. En español se ignoran también las tildes. El sistema utiliza sinónimos registrados; no consulta IA ni interpreta cualquier traducción libre. Puedes ampliar `MEANINGS` si necesitas otra traducción válida. En la lista de consulta se pueden ver los sinónimos aceptados y los significados que hay que completar.
+Las mayúsculas y los espacios sobrantes no cambian la corrección. En español se ignoran también las tildes. El sistema utiliza sinónimos registrados; no consulta IA ni interpreta cualquier traducción libre. Puedes ampliar `MEANINGS` si necesitas otra traducción válida. En la lista de consulta se pueden ver los sinónimos aceptados y todos los significados para estudiar.
 
 La lista mantiene las formas inglesas de las fotografías. `ENGLISH_EXTRA` añade variantes estándar como `gotten`, `shined` o `showed` como participio.
 
@@ -98,9 +98,9 @@ begin;began;begun;empezar / comenzar
 bite;bit;bitten;morder + picar
 ```
 
-Para las traducciones, `/` o `-` separan sinónimos; ` + ` separa significados distintos que se deben completar. Para verbos registrados y formas inglesas compatibles, la app reconoce qué significados contiene la lista y acepta sus sinónimos. También reconoce `ser / estar` como dos significados conocidos. No aplica los significados de `lie / lay / lain` a una lista que contenga `lie / lied / lied`.
+Para las traducciones, `/` o `-` separan sinónimos; ` + ` agrupa significados distintos para estudiar, sin exigirlos todos al responder. Para verbos registrados y formas inglesas compatibles, la app reconoce qué significados contiene la lista y acepta sus sinónimos. También reconoce `ser / estar` como dos significados conocidos. No aplica los significados de `lie / lay / lain` a una lista que contenga `lie / lied / lied`.
 
-Para un verbo desconocido, `probar / examinar + comprobar` define dos significados: en el primero sirven probar o examinar; en el segundo, comprobar.
+Para un verbo desconocido, `probar / examinar + comprobar` agrupa dos significados: cualquiera de probar, examinar o comprobar da la puntuación completa; se muestran los demás como nota informativa.
 
 Se admiten tabuladores, punto y coma o comas como separadores de columnas. Si una casilla contiene el mismo separador, debe ir entre comillas. La cabecera es opcional. Máximo 500 verbos, 150 caracteres por casilla y archivo de 300 KB; sin infinitivos repetidos.
 
@@ -127,4 +127,4 @@ Para ejecutar las pruebas con Node.js:
 node tests/core.test.cjs
 ```
 
-Validación realizada: 24 grupos de comprobaciones del cálculo de nota, variantes, huecos, caso especial de `can`, reparto de pistas, importación y validación de listas. Además se ha probado en navegador el intervalo y la exclusión, el guardado tras recargar, la corrección, el repaso de errores, la importación y la restauración de listas. La actualización comprueba además barras y guiones, todos los sinónimos registrados, medios puntos en ambos modos, separación de significados, exportación e importación sin pérdida de grupos, repaso de incompletos y visualización móvil de la corrección. Diseño revisado en ordenador y en un marco de 390 px para comprobar la adaptación móvil.
+Validación realizada: 22 grupos de comprobaciones del cálculo de nota, variantes, huecos, caso especial de `can`, reparto de pistas, importación y validación de listas. Además se ha probado en navegador el intervalo y la exclusión, el guardado tras recargar, la corrección, el repaso de errores, la importación y la restauración de listas. La actualización comprueba además barras y guiones, todos los sinónimos registrados, puntuación completa con una traducción válida en ambos modos, avisos informativos de otros significados, exportación e importación sin pérdida de grupos, repaso de incompletos y visualización móvil de la corrección. Diseño revisado en ordenador y en un marco de 390 px para comprobar la adaptación móvil.
